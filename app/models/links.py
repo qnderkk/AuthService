@@ -9,7 +9,7 @@ user_roles = Table(
     Column("role_id", ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True)
 )
 
-role_permission = Table(
+role_permissions = Table(
     "role_permission",
     Base.metadata,
     Column("role_id", ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True),
