@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     DB_PASS: str
     DB_NAME: str
 
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+
     @computed_field
     @property
     def database_url(self) -> str:
