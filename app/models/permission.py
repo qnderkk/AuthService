@@ -1,7 +1,7 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from base import Base
-from links import role_permissions
+from .base import Base
+from .links import role_permissions
 
 
 class Permission(Base):
