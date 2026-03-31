@@ -26,6 +26,9 @@ async def register_user(user_in: UserCreate, db: AsyncSession = Depends(get_db))
     
     new_user = User(
         email=user_in.email,
+        name=user_in.name,
+        last_name=user_in.last_name,
+        father_name=user_in.father_name,
         hashed_password=hash_password(user_in.password)
     )
 
@@ -57,6 +60,12 @@ async def login_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deactivated"
         )
     
     access_token = create_access_token(data={"sub": str(user.id)})
