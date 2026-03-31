@@ -40,4 +40,3 @@ async def get_current_user(
         raise HTTPException(status_code=400, detail="The user is inactive")
     
     return user
-
