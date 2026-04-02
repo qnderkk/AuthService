@@ -76,6 +76,7 @@ async function submitRegistration() {
   const payload = {
     email: email,
     password: password,
+    password_repeat: confirm,
     name: name,
     last_name: lastName,
     father_name: fatherName || null,
