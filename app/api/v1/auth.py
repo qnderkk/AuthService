@@ -3,13 +3,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timezone, timedelta
+from fastapi import Response, Request
 
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token, verify_token
-from app.schemas.auth import Token, RefreshTokenRequest
+from app.schemas.auth import Token
 from app.models.token import RefreshToken
+from app.api.v1.utils import set_auth_cookies
 from app.core.config import settings
 
 
@@ -50,8 +52,9 @@ async def register_user(user_in: UserCreate, db: AsyncSession = Depends(get_db))
     return new_user
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=dict[str, str])
 async def login_user(
+    response: Response,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
@@ -92,19 +95,30 @@ async def login_user(
             detail="Error when saving to the database"
         )
 
-    return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
+    set_auth_cookies(response, access_token, refresh_token)
+
+    return {"message": "Logged in successfully"}
 
 
-@router.post("/refresh", response_model=Token)
+@router.post("/refresh", response_model=dict[str, str])
 async def refresh_token(
-    refresh_data: RefreshTokenRequest,
+    request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(RefreshToken).where(RefreshToken.token == refresh_data.refresh_token)
+    old_refresh_token = request.cookies.get("refresh_token")
+
+    if not old_refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing"
+        )
+
+    payload = verify_token(old_refresh_token, access_type="refresh")
+
+    query = select(RefreshToken).where(RefreshToken.token == old_refresh_token)
     result = await db.execute(query)
     token = result.scalar_one_or_none()
-
-    payload = verify_token(refresh_data.refresh_token, access_type="refresh")
 
     if not token or token.is_expired:
         raise HTTPException(
@@ -133,4 +147,6 @@ async def refresh_token(
             detail="Error when saving to the database"
         )
     
-    return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
+    set_auth_cookies(response, access_token, refresh_token)
+    
+    return {"message": "Tokens refreshed"}

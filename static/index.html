@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AuthService Tester</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <h1>Security Control Panel</h1>
+        <p>Stateless JWT Authentication System</p>
+      </header>
+
+      <main>
+        <section class="auth-section">
+          <div class="card">
+            <h3>Вход в систему</h3>
+            <div class="input-group">
+              <input
+                type="email"
+                id="login-email"
+                placeholder="Email"
+                value=""
+              />
+              <input
+                type="password"
+                id="login-password"
+                placeholder="Пароль"
+                value=""
+              />
+            </div>
+            <div class="button-grid">
+              <button onclick="login()" class="btn-primary">Login</button>
+              <button onclick="openModal()" class="btn-secondary">
+                Create Account
+              </button>
+            </div>
+            <div class="action-grid">
+              <button onclick="getMe()" class="btn-info">Get /me</button>
+              <button onclick="refreshToken()" class="btn-warning">
+                Refresh Session
+              </button>
+              <button onclick="logout()" class="btn-danger">Logout</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="log-section">
+          <div class="log-card">
+            <div class="log-header">
+              <span>Terminal Output</span>
+              <button onclick="clearLogs()" class="btn-clear">Clear</button>
+            </div>
+            <pre id="log-output">System ready...</pre>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="registerModal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Регистрация</h2>
+          <span class="close-icon" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="registration-form">
+          <input type="text" id="reg-name" placeholder="Имя*" />
+          <input type="text" id="reg-last-name" placeholder="Фамилия*" />
+          <input type="text" id="reg-father-name" placeholder="Отчество" />
+          <input type="email" id="reg-email" placeholder="Email*" />
+          <input type="password" id="reg-password" placeholder="Пароль*" />
+          <input
+            type="password"
+            id="reg-confirm"
+            placeholder="Повторите пароль*"
+          />
+
+          <div class="modal-actions">
+            <button onclick="submitRegistration()" class="btn-success">
+              Зарегистрироваться
+            </button>
+            <button onclick="closeModal()" class="btn-cancel">Отмена</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+  </body>
+</html>
