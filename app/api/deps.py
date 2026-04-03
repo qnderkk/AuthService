@@ -4,10 +4,12 @@ from fastapi.requests import Request
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User
+from app.models.role import Role
 from app.schemas.auth import TokenData
 
 
@@ -44,7 +46,9 @@ async def get_current_user(
     except (JWTError, ValueError):
         raise credentials_exception
     
-    result = await db.execute(select(User).where(User.id == token_data.user_id))
+    query = select(User).where(User.id == token_data.user_id).options(selectinload(User.roles).selectinload(Role.permissions))
+    
+    result = await db.execute(query)
     user = result.scalar_one_or_none()
 
     if user is None:

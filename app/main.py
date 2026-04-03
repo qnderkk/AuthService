@@ -16,7 +16,6 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(user_router, prefix="/api/v1")
 
 static_dir = Path("./static").absolute()
-print(static_dir)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 

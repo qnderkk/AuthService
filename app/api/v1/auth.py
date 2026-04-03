@@ -9,9 +9,8 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserRead
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token, verify_token
-from app.schemas.auth import Token
 from app.models.token import RefreshToken
-from app.api.v1.utils import set_auth_cookies
+from app.api.utils import set_auth_cookies
 from app.core.config import settings
 
 

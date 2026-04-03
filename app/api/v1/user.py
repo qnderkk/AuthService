@@ -9,10 +9,12 @@ from app.models.token import RefreshToken
 from app.schemas.user import UserRead, UserUpdate
 from app.db.session import get_db
 from app.core.security import hash_password
-from app.api.v1.utils import delete_auth_cookies
+from app.api.utils import delete_auth_cookies
+from app.core.permissions import PermissionChecker
 
 
 router = APIRouter(prefix="/users", tags=["users"])
+
 
 @router.get("/me", response_model=UserRead)
 async def read_user(current_user: User = Depends(get_current_user)):
@@ -47,7 +49,8 @@ async def update_user(
 
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(
+async def delete_account(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -61,6 +64,8 @@ async def delete_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error during account deactivation"
         )
+    
+    delete_auth_cookies(request)
     
     return None
 
@@ -95,3 +100,38 @@ async def logout_user(
     delete_auth_cookies(response)
 
     return {"message": "Logged out successfully"}
+
+
+@router.delete("/delete/{user_id}")
+async def delete_some_user(
+    user_id: int,
+    current_admin: User = Depends(PermissionChecker("users_delete")),
+    db: AsyncSession = Depends(get_db)
+):
+    if user_id == current_admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Can not delete yurself"
+        )
+    
+    query = select(User).where(user_id == User.id)
+    result = await db.execute(query)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No user in db"
+        )
+    
+    try:
+        await db.delete(user)
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error during account deletion"
+        )
+    
+    return {"message": f"Пользователь ID {user_id} ({user.email}) успешно удален"}
