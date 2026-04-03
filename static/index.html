@@ -37,12 +37,36 @@
                 Create Account
               </button>
             </div>
+
             <div class="action-grid">
+              <button
+                onclick="deactivateSelf()"
+                class="btn-danger"
+                style="border: 2px solid white"
+              >
+                Deactivate My Account
+              </button>
               <button onclick="getMe()" class="btn-info">Get /me</button>
               <button onclick="refreshToken()" class="btn-warning">
                 Refresh Session
               </button>
               <button onclick="logout()" class="btn-danger">Logout</button>
+            </div>
+            <div
+              class="admin-panel card"
+              style="margin-top: 20px; border-color: var(--error)"
+            >
+              <h4>Admin Zone</h4>
+              <div class="input-group">
+                <input
+                  type="number"
+                  id="delete-user-id"
+                  placeholder="ID пользователя для удаления"
+                />
+                <button onclick="deleteUser()" class="btn-danger">
+                  Delete User by ID
+                </button>
+              </div>
             </div>
           </div>
         </section>

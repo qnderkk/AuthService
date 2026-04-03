@@ -187,3 +187,56 @@ async function logout() {
     log("ERROR: LOGOUT", err.message);
   }
 }
+
+async function deleteUser() {
+  const userId = document.getElementById("delete-user-id").value;
+  if (!userId) return alert("Введите ID пользователя");
+
+  if (!confirm(`Вы уверены, что хотите удалить пользователя с ID ${userId}?`))
+    return;
+
+  try {
+    const response = await fetch(`/api/v1/users/delete/${userId}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+    log("API: DELETE USER", data);
+
+    if (response.status === 403) {
+      alert("У вас недостаточно прав! (Нужно право users_delete)");
+    } else if (response.ok) {
+      alert("Пользователь удален");
+    }
+  } catch (err) {
+    log("ERROR: DELETE", err.message);
+  }
+}
+
+async function deactivateSelf() {
+  if (
+    !confirm(
+      "Вы уверены, что хотите деактивировать свой аккаунт? Вы больше не сможете войти без помощи администратора.",
+    )
+  ) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/v1/users/delete", {
+      method: "DELETE",
+    });
+
+    if (response.status === 204) {
+      log("SYSTEM", "Account deactivated. Cookies cleared.");
+      alert("Ваш аккаунт деактивирован. Вы будете перенаправлены.");
+      // Очищаем интерфейс, так как пользователь больше не залогинен
+      location.reload();
+    } else {
+      const data = await response.json();
+      log("API: DEACTIVATE ERROR", data);
+    }
+  } catch (err) {
+    log("ERROR", err.message);
+  }
+}

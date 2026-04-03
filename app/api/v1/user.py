@@ -50,7 +50,7 @@ async def update_user(
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_account(
-    request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -65,7 +65,7 @@ async def delete_account(
             detail="Error during account deactivation"
         )
     
-    delete_auth_cookies(request)
+    delete_auth_cookies(response)
     
     return None
 
